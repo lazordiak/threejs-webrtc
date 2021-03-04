@@ -19,7 +19,7 @@ class Scene {
 
     //Utility
     this.width = window.innerWidth;
-    this.height = window.innerHeight - 100;
+    this.height = window.innerHeight - 75;
 
     //Add Player
     this.addSelf();
@@ -31,12 +31,23 @@ class Scene {
       0.1,
       5000
     );
-    this.camera.position.set(0, 3, 6);
+    this.camera.position.set(0, 8, 8);
     this.scene.add(this.camera);
 
     // create an AudioListener and add it to the camera
     this.listener = new THREE.AudioListener();
     this.playerGroup.add(this.listener);
+
+    const sound = new THREE.Audio( this.listener );
+
+    // load a sound and set it as the Audio object's buffer
+    this.audioLoader = new THREE.AudioLoader();
+    this.audioLoader.load( '../assets/nightSound.wav', function( buffer ) {
+      sound.setBuffer( buffer );
+      sound.setLoop( true );
+      sound.setVolume( .35 );
+      sound.play();
+    });
 
     //THREE WebGL renderer
     this.renderer = new THREE.WebGLRenderer({
@@ -44,6 +55,9 @@ class Scene {
     });
     this.renderer.setClearColor(new THREE.Color("lightblue"));
     this.renderer.setSize(this.width, this.height);
+
+
+    this.scene.fog = new THREE.FogExp2(0x11111f, 0.002);
 
     // add controls:
     this.controls = new THREE.PlayerControls(this.camera, this.playerGroup);
@@ -58,11 +72,11 @@ class Scene {
     window.addEventListener("keyup", (e) => this.onKeyUp(e), false);
 
     // Helpers
-    this.scene.add(new THREE.GridHelper(500, 500));
-    this.scene.add(new THREE.AxesHelper(10));
+    //this.scene.add(new THREE.GridHelper(500, 500));
+    //this.scene.add(new THREE.AxesHelper(10));
 
     this.addLights();
-    createEnvironment(this.scene);
+    createEnvironment(this.scene,this.camera);
 
     // Start the loop
     this.frameCount = 0;
@@ -74,7 +88,27 @@ class Scene {
   // Lighting 💡
 
   addLights() {
-    this.scene.add(new THREE.AmbientLight(0xffffe6, 0.7));
+    this.scene.add(new THREE.AmbientLight(0x555555, 0.7));
+
+    let directionalLight = new THREE.DirectionalLight(0xffeedd);
+    directionalLight.position.set(0,0,1.);
+    //this.scene.add(directionalLight);
+
+    const spotLight = new THREE.SpotLight( 0xffffff );
+    spotLight.position.set( 5, 20, 0 );
+    spotLight.castShadow = true;
+    spotLight.decay = 2;
+    spotLight.angle = Math.PI/6;
+    //spotLight.distance = .2;
+    this.scene.add(spotLight);
+
+    const spotLight2 = new THREE.PointLight(0xFAA489);
+    spotLight2.position.set(-250,5,0);
+    spotLight2.decay = 2;
+    spotLight2.intensity = 0.2;
+    //spotLight.angle = Math.PI / 6;
+
+    this.scene.add(spotLight2);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -86,11 +120,11 @@ class Scene {
 
     let _head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), videoMaterial);
 
-    _head.position.set(0, 0, 0);
+    _head.position.set(0, .5, 0);
 
     // https://threejs.org/docs/index.html#api/en/objects/Group
     this.playerGroup = new THREE.Group();
-    this.playerGroup.position.set(0, 0.5, 0);
+    this.playerGroup.position.set(0, 1., 0);
     this.playerGroup.add(_head);
 
     // add group to scene
@@ -105,7 +139,7 @@ class Scene {
 
     // set position of head before adding to parent object
 
-    _head.position.set(0, 0, 0);
+    _head.position.set(0, .5, 0);
 
     // https://threejs.org/docs/index.html#api/en/objects/Group
     var group = new THREE.Group();
@@ -179,13 +213,13 @@ class Scene {
           clients[_id].group.position
         );
 
-        if (distSquared > 500) {
+        if (distSquared > 700) {
           // console.log('setting vol to 0')
           audioEl.volume = 0;
         } else {
           // from lucasio here: https://discourse.threejs.org/t/positionalaudio-setmediastreamsource-with-webrtc-question-not-hearing-any-sound/14301/29
           let volume = Math.min(1, 10 / distSquared);
-          audioEl.volume = volume;
+          audioEl.volume = volume * 1.5;
           // console.log('setting vol to',volume)
         }
       }
