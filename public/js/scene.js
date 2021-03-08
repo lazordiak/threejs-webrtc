@@ -76,7 +76,7 @@ class Scene {
     //this.scene.add(new THREE.AxesHelper(10));
 
     this.addLights();
-    createEnvironment(this.scene,this.camera);
+    createEnvironment(this.scene,this.camera,this.listener,this.audioLoader);
 
     // Start the loop
     this.frameCount = 0;
@@ -90,8 +90,8 @@ class Scene {
   addLights() {
     this.scene.add(new THREE.AmbientLight(0x555555, 0.7));
 
-    let directionalLight = new THREE.DirectionalLight(0xffeedd);
-    directionalLight.position.set(0,0,1.);
+    /*let directionalLight = new THREE.DirectionalLight(0xffeedd);
+    directionalLight.position.set(0,0,1.);*/
     //this.scene.add(directionalLight);
 
     const spotLight = new THREE.SpotLight( 0xffffff );
@@ -109,6 +109,11 @@ class Scene {
     //spotLight.angle = Math.PI / 6;
 
     this.scene.add(spotLight2);
+
+    const directionalLight = new THREE.DirectionalLight( 0x506886, 1.5 );
+    directionalLight.position.set(5,10,5);
+    directionalLight.castShadow = true;
+    this.scene.add( directionalLight );
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -277,7 +282,7 @@ class Scene {
 
   onWindowResize(e) {
     this.width = window.innerWidth;
-    this.height = Math.floor(window.innerHeight - window.innerHeight * 0.3);
+    this.height = window.innerHeight;//Math.floor(window.innerHeight - window.innerHeight * 0.3);
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.width, this.height);

@@ -21,7 +21,7 @@ function randomFromInterval(min, max) { // min and max included
   return (Math.random() * (max - min + 1) + min);
 }
 
-function createEnvironment(scene,camera) {
+function createEnvironment(scene,camera,listener,loader) {
 
   var skyDomeRadius = 1000.01;
   var sphereMaterial = new THREE.ShaderMaterial({
@@ -74,7 +74,7 @@ function createEnvironment(scene,camera) {
   scene.add(myMesh);*/
 
   const planeGeo = new THREE.PlaneGeometry(600,50);
-  const planeMat = new THREE.MeshStandardMaterial( {color: 000000, side: THREE.FrontSide} );
+  const planeMat = new THREE.MeshStandardMaterial( {color: 0xffffff, side: THREE.FrontSide} );
   //const planeMat = new THREE.MeshLambertMaterial( {color: (16324F), side: THREE.DoubleSide} );
   const plane = new THREE.Mesh( planeGeo,planeMat );
   plane.position.x = -275;
@@ -119,17 +119,18 @@ function createEnvironment(scene,camera) {
   // fire.mesh accepts THREE.mesh features
   fire.mesh.position.set(-250, fireHeight/1.8, 0 );
 
-  sound = new Howl({
-    src: '../assets/fire.wav',
-    autoplay: true,
-    loop: true,
-    volume: 1
+  const positionalAudio = new THREE.PositionalAudio( listener );
+
+  loader.load( '../assets/fire.wav', function( buffer ) {
+    positionalAudio.setBuffer( buffer );
+    positionalAudio.setLoop(true);
+    positionalAudio.setVolume(1.2);
+    positionalAudio.setRefDistance( 20 );
+    positionalAudio.play();
   });
-  
-  // Use the x/y/z position of the entity
-  sound.pos(-250, 0.5, 0);
-  
-  sound.play();
+
+  fire.mesh.add(positionalAudio);
+
 }
 
 ///////////////////////////////////////////////////////////////
